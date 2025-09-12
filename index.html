@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Johana, te amo ❤️</title>
+  <style>
+    :root{
+      --bg1:#ff9a9e;
+      --bg2:#fecfef;
+      --accent:#ff407d;
+      --glass: rgba(255,255,255,0.12);
+    }
+    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial}
+    .splash{
+      height:100vh;display:grid;place-items:center;position:relative;overflow:hidden;
+      background:linear-gradient(135deg,var(--bg1) 0%, var(--bg2) 100%);
+    }
+    .center{
+      text-align:center;color:white;padding:28px;border-radius:20px;background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      backdrop-filter: blur(6px);box-shadow:0 8px 30px rgba(0,0,0,0.18);max-width:920px;width:min(92%,920px);
+    }
+    h1{font-size:clamp(28px,6vw,72px);margin:0 0 8px 0;line-height:1.02;letter-spacing:-1px}
+    p.lead{font-size:clamp(14px,2.2vw,18px);margin:0 0 18px 0;opacity:0.95}
+
+    /* Heart */
+    .heart-wrap{display:inline-block;vertical-align:middle;margin-right:12px}
+    .heart{width:84px;height:84px;display:inline-block;position:relative;transform-origin:center center;animation:pulse 1.6s ease-in-out infinite}
+    .heart::before, .heart::after{content:'';position:absolute;left:50%;top:30%;width:50%;height:70%;background:var(--accent);border-radius:50%;transform-origin:center;}
+    .heart::before{transform:translate(-80%, -10%) rotate(-45deg);}
+    .heart::after{transform:translate(-20%, -10%) rotate(45deg);}
+    .heart .base{position:absolute;left:50%;top:48%;width:70%;height:70%;background:var(--accent);transform:translate(-50%, -10%) rotate(0deg);border-radius:18px 18px 20px 20px}
+
+    @keyframes pulse{
+      0%{transform:scale(0.94)}
+      50%{transform:scale(1)}
+      100%{transform:scale(0.94)}
+    }
+
+    /* small subtitle anim */
+    .subtitle{opacity:0;transform:translateY(8px);animation:fadeUp .9s ease forwards .45s}
+    @keyframes fadeUp{to{opacity:1;transform:none}}
+
+    /* floating hearts */
+    .floating-heart{position:absolute;bottom:-60px;pointer-events:none;opacity:0.95}
+    .floating-heart svg{width:28px;height:28px}
+
+    /* footer small */
+    .controls{margin-top:18px;display:flex;gap:10px;justify-content:center}
+    .btn{background:rgba(255,255,255,0.12);border:0;padding:10px 14px;border-radius:10px;color:white;cursor:pointer;font-weight:600}
+    .btn:active{transform:translateY(1px)}
+
+    /* responsive */
+    @media (max-width:520px){.heart{width:64px;height:64px}.center{padding:18px}}
+  </style>
+</head>
+<body>
+  <main class="splash" id="splash">
+    <div class="center" role="main" aria-labelledby="titulo">
+      <div style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap">
+        <div class="heart-wrap" aria-hidden="true">
+          <div class="heart"><div class="base"></div></div>
+        </div>
+        <h1 id="titulo">Johana, <span style="text-shadow:0 6px 18px rgba(0,0,0,0.18)">te amo</span></h1>
+      </div>
+      <p class="lead subtitle">Un pequeño recordatorio de lo mucho que significas para mí. ❤️</p>
+      <div class="controls">
+        <button class="btn" id="sendBtn" title="Enviar mensaje">Enviar</button>
+        <button class="btn" id="replayBtn" title="Volver a ver">Repetir</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Crear corazones flotantes aleatorios
+    const container = document.getElementById('splash');
+    function rand(min,max){return Math.random()*(max-min)+min}
+    function makeFloatingHeart(){
+      const el = document.createElement('div');
+      el.className='floating-heart';
+      const size = Math.round(rand(18,48));
+      el.style.left = rand(6,94)+'%';
+      el.style.width = size+'px';
+      el.style.height = size+'px';
+      el.style.opacity = rand(0.6,1);
+      el.innerHTML = `
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M12 21s-7.2-4.35-9.2-7.2C-1.2 9.8 4 4 7 6.6 9.6 8.8 12 11 12 11s2.4-2.2 5-4.4c3-2.6 8.2 3.2 4.4 7.2C19.2 16.65 12 21 12 21z" fill="white" />
+        </svg>`;
+      container.appendChild(el);
+
+      // animate using Web Animations API
+      const endY = -120 - size;
+      const duration = rand(3500,7000);
+      el.animate([
+        { transform: `translateY(0px) scale(${rand(0.6,1)})`, opacity: el.style.opacity },
+        { transform: `translateY(${endY}px) scale(${rand(0.8,1.1)})`, opacity: 0 }
+      ],{duration: duration, easing: 'cubic-bezier(.2,.8,.2,1)'}).onfinish = ()=> el.remove();
+    }
+
+    // spawn hearts while visible
+    let heartInterval;
+    function startHearts(){heartInterval = setInterval(makeFloatingHeart, 450)}
+    function stopHearts(){clearInterval(heartInterval)}
+
+    // start automatically
+    startHearts();
+
+    // buttons
+    document.getElementById('replayBtn').addEventListener('click', ()=>{
+      // small pulse replay
+      const h = document.querySelector('.heart');
+      h.animate([{transform:'scale(1)'},{transform:'scale(1.14)'},{transform:'scale(1)'}],{duration:520,easing:'ease-out'})
+    });
+
+    document.getElementById('sendBtn').addEventListener('click', ()=>{
+      // simulate "enviar" mostrando confetti of hearts
+      for(let i=0;i<18;i++) setTimeout(makeFloatingHeart, i*60 + Math.random()*300);
+    });
+
+    // Accessibility: stop animations when user prefers-reduced-motion
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if(mq.matches){ stopHearts(); document.querySelectorAll('.floating-heart').forEach(e=>e.remove()); }
+
+    // Clean up when page is hidden
+    document.addEventListener('visibilitychange', ()=>{
+      if(document.hidden) stopHearts(); else startHearts();
+    });
+  </script>
+</body>
+</html>
