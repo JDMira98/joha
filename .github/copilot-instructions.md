@@ -7,7 +7,7 @@ This is a personal repository containing a romantic web page dedicated to Johana
 ## Project Structure
 
 - `index.html` - Main HTML file containing all structure, styles, and JavaScript
-- `*.jpeg` - WhatsApp images used in the photo gallery
+- `WhatsApp Image YYYY-MM-DD at H.MM.SS XM.jpeg` - WhatsApp exported images used in the photo gallery
 - `README.md` - Simple repository description
 
 ## Code Conventions
@@ -33,7 +33,7 @@ This is a personal repository containing a romantic web page dedicated to Johana
 
 - **Vanilla JavaScript**: No jQuery or frameworks
 - **Event handlers**: Direct DOM manipulation and event listener assignment
-- **Animation timing**: Uses `setInterval` and `animate()` API for visual effects
+- **Animation timing**: Uses `setInterval` and Web Animations API (`element.animate()`) for visual effects
 - **ES6 features**: Arrow functions, template literals, and modern syntax
 
 ## Key Features to Maintain
