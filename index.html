@@ -1176,37 +1176,66 @@
     }
 
     /* ========================================
+       LOAD IMAGES FROM GITHUB API
+       ======================================== */
+    async function loadImagesFromGitHub() {
+      const owner = 'JDMira98';
+      const repo = 'joha';
+      const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/`;
+      
+      try {
+        const response = await fetch(apiUrl);
+        
+        // Validate HTTP response status
+        if (!response.ok) {
+          throw new Error(`GitHub API returned ${response.status}: ${response.statusText}`);
+        }
+        
+        const files = await response.json();
+        
+        const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+        const imageFiles = files.filter(file => 
+          file.type === 'file' && 
+          imageExtensions.some(ext => file.name.toLowerCase().endsWith(ext))
+        );
+        
+        return imageFiles.map(file => ({
+          url: file.download_url,
+          name: file.name
+        }));
+      } catch (error) {
+        console.error('Error loading images:', error);
+        return [];
+      }
+    }
+
+    /* ========================================
        DYNAMIC GALLERY - Auto-load images
        ======================================== */
     async function initDynamicGallery() {
       const galleryGrid = document.getElementById('gallery-grid');
       
-      // Supported image extensions
-      const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+      // Cargar imágenes desde GitHub API
+      const images = await loadImagesFromGitHub();
       
-      // In a real GitHub Pages environment, we need to fetch the repo contents
-      // For now, we'll use a simpler approach: try to load known images
-      // This works because we can list the images directly
+      // Handle case when no images are found
+      if (images.length === 0) {
+        console.warn('No images found in repository');
+        galleryGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px;">No se encontraron imágenes en el repositorio.</p>';
+        return;
+      }
       
-      const knownImages = [
-        'WhatsApp Image 2025-09-08 at 7.10.14 PM.jpeg',
-        'WhatsApp Image 2025-09-14 at 12.24.44 PM.jpeg',
-        'WhatsApp Image 2025-09-17 at 1.11.08 PM.jpeg',
-        'WhatsApp Image 2025-09-22 at 10.19.11 AM.jpeg',
-        'WhatsApp Image 2025-09-22 at 10.19.12 AM.jpeg'
-      ];
-      
-      allImages = knownImages;
+      allImages = images.map(img => img.url);
       
       // Create gallery items
-      knownImages.forEach((imagePath, index) => {
+      images.forEach((image, index) => {
         const item = document.createElement('div');
         item.className = 'gallery-item loading';
         item.setAttribute('role', 'listitem');
         
         const img = document.createElement('img');
-        img.src = imagePath;
-        img.alt = `Recuerdo ${index + 1}`;
+        img.src = image.url;
+        img.alt = `Recuerdo ${index + 1} - ${image.name}`;
         img.loading = 'lazy';
         
         // Remove loading class when image loads
@@ -1215,8 +1244,8 @@
         };
         
         img.onerror = () => {
-          // Remove from array and hide gracefully instead of display:none
-          const idx = allImages.indexOf(imagePath);
+          // Remove from allImages array to keep it in sync with DOM
+          const idx = allImages.indexOf(image.url);
           if (idx > -1) {
             allImages.splice(idx, 1);
           }
@@ -1224,7 +1253,13 @@
         };
         
         item.appendChild(img);
-        item.addEventListener('click', () => openLightbox(index));
+        item.addEventListener('click', () => {
+          // Find current index in allImages array
+          const currentIndex = allImages.indexOf(image.url);
+          if (currentIndex !== -1) {
+            openLightbox(currentIndex);
+          }
+        });
         
         galleryGrid.appendChild(item);
       });
