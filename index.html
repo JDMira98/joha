@@ -1185,6 +1185,12 @@
       
       try {
         const response = await fetch(apiUrl);
+        
+        // Validate HTTP response status
+        if (!response.ok) {
+          throw new Error(`GitHub API returned ${response.status}: ${response.statusText}`);
+        }
+        
         const files = await response.json();
         
         const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
@@ -1211,6 +1217,14 @@
       
       // Cargar imágenes desde GitHub API
       const images = await loadImagesFromGitHub();
+      
+      // Handle case when no images are found
+      if (images.length === 0) {
+        console.warn('No images found in repository');
+        galleryGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center; padding: 40px;">No se encontraron imágenes en el repositorio.</p>';
+        return;
+      }
+      
       allImages = images.map(img => img.url);
       
       // Create gallery items
@@ -1230,6 +1244,11 @@
         };
         
         img.onerror = () => {
+          // Remove from allImages array to keep it in sync with DOM
+          const idx = allImages.indexOf(image.url);
+          if (idx > -1) {
+            allImages.splice(idx, 1);
+          }
           item.remove();
         };
         
